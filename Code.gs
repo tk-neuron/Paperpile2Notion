@@ -3,38 +3,36 @@ const DB_ID = PROPS.getProperty('NOTION_DB_ID');
 const TOKEN = PROPS.getProperty('NOTION_TOKEN');
 const FOLDER_ID = PROPS.getProperty('FOLDER_ID');
 
+// set status for already scanned files (stored in file Description)
 const STATUS = {
   DONE: 'DONE',
   ERROR: 'ERROR',
 }
 
-
+// main
 function myFunction() {
   const files = getFiles()
-  scanFiles(files);
+  scanAndSendFiles(files);
 }
 
+// get all files in the folder specified with id
 function getFiles() {
   const targetFolder = DriveApp.getFolderById(FOLDER_ID);
-  const files = targetFolder.getFiles();
-  return files;
+  return targetFolder.getFiles();
 }
 
-function getThumbnailUrl(fileId, width=1600, authuser=0){
-  return `https://lh3.googleusercontent.com/d/${fileId}=w${width}?authuser=${authuser}`;
-}
-
-function scanFiles(files, nMax=500, retryMax=30) {
+// scan every file in the folder and send to Notion if not scanned yet
+function scanAndSendFiles(files, nMax=500, retryMax=30) {
   let count = 0;
   let retryCount = 0;
 
   while (files.hasNext()) {
-    let file = files.next();
-    const status = file.getDescription();
-
     if (count == nMax | retryCount == retryMax) {
       break;
     }
+
+    let file = files.next();
+    const status = file.getDescription();
 
     if (status == STATUS.DONE | status == STATUS.ERROR) {
       continue;
@@ -42,8 +40,10 @@ function scanFiles(files, nMax=500, retryMax=30) {
 
     const filename = file.getName();
     const url = file.getUrl();
-    const [journal, firstAuthor, lastAuthor, year, title] = filename.split('_');
     const thumbnailURL = getThumbnailUrl(file.getId());
+
+    // customize here according to your file naming configuration
+    const [journal, firstAuthor, lastAuthor, year, title] = filename.split('_');
 
     try {
       const result = {
@@ -57,21 +57,26 @@ function scanFiles(files, nMax=500, retryMax=30) {
       };
       send2Notion(result);
       file.setDescription(STATUS.DONE);
-      Logger.log(`upload to Notion succeeded: ${filename}`);
+      Logger.log(`Succeeded: ${filename}`);
       count ++;
     } 
     catch (e) {
       file.setDescription(STATUS.ERROR);
       Logger.log(e.message);
-      Logger.log(`upload to Notion failed: ${filename}`);
+      Logger.log(`Failed: ${filename}`);
       retryCount ++;
     }
   }
 }
 
+// get cover photo for the page
+function getThumbnailUrl(fileId, width=1600, authuser=0){
+  return `https://lh3.googleusercontent.com/d/${fileId}=w${width}?authuser=${authuser}`;
+}
+
 function send2Notion(result) {
   const apiUrl = 'https://api.notion.com/v1/pages';
-  const obj = generateObj(DB_ID, result);
+  const obj = generateObj(result);
   const options = {
     method: "POST",
     headers: {
@@ -84,10 +89,10 @@ function send2Notion(result) {
   UrlFetchApp.fetch(apiUrl, options);
 }
 
-function generateObj(dbId, result) {
+function generateObj(result) {
   const pageObj = {
     parent: {
-      database_id: dbId,
+      database_id: DB_ID,
     },
     cover: {
         "type": "external",
