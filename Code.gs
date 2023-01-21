@@ -26,7 +26,7 @@ function scanAndSendFiles(files, nMax=500) {
   let count = 0;
 
   while (files.hasNext()) {
-    if (count == nMax | retryCount == retryMax) {
+    if (count == nMax) {
       break;
     }
 
