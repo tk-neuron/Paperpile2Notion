@@ -1,13 +1,7 @@
 {
   "timeZone": "Asia/Tokyo",
   "dependencies": {
-    "enabledAdvancedServices": [
-      {
-        "userSymbol": "Drive",
-        "version": "v2",
-        "serviceId": "drive"
-      }
-    ]
+    "enabledAdvancedServices": []
   },
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8"
