@@ -6,6 +6,9 @@ When Paperpile stores your PDFs in Google Drive, automatically sync Notion Datab
 How it would look:
 <img width="1000" alt="Notion Database Example" src="https://user-images.githubusercontent.com/38024515/213866746-9a531e37-c606-4259-8b5f-4e920c8a5466.png">
 
+Introduction written in Japanese:
+https://note.com/mybrain_record/n/n42a10a807ae5
+
 ## Tools
 - Paperpile (as reference importer + manager)
 - Notion (as reference manager + editor)
